@@ -3,4 +3,5 @@ __pycache__/
 *.egg-info/
 *.pyc
 datasets/*/auth.all.log
+datasets/*/auth.all.pickle
 datasets/*/train-test/*
