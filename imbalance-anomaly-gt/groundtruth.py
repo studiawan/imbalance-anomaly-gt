@@ -1,6 +1,9 @@
 import os
 import sys
 import pickle
+import re
+from nltk import corpus
+from statistics import mean
 from nerlogparser.nerlogparser import Nerlogparser
 
 
@@ -9,6 +12,7 @@ class GroundTruth(object):
         self.dataset = dataset
         self.configurations = {}
         self.parser = Nerlogparser()
+        self.stopwords = corpus.stopwords.words('english')
 
     @staticmethod
     def __read_wordlist():
@@ -32,6 +36,35 @@ class GroundTruth(object):
         parsed_logs = self.parser.parse_logs(log_file)
 
         return parsed_logs
+
+    def __preprocess(self, message):
+        # split
+        message = message.lower()
+        message = message.replace('=', ' ')
+        message = message.replace('/', ' ')
+        message = message.replace('-', ' ')
+        line = message.split()
+
+        # get alphabet only
+        line_split = []
+        for li in line:
+            alphabet_only = re.sub('[^a-zA-Z]', '', li)
+            if alphabet_only != '':
+                line_split.append(alphabet_only)
+
+        # remove word with length only 1 character
+        for index, word in enumerate(line_split):
+            if len(word) == 1:
+                line_split[index] = ''
+
+        # remove stopwords
+        preprocessed_message = []
+        for word in line_split:
+            if word != '':
+                if word not in self.stopwords:
+                    preprocessed_message.append(word)
+
+        return preprocessed_message
 
     @staticmethod
     def __set_sentiment_label(wordlist, parsed_logs):
@@ -64,6 +97,14 @@ class GroundTruth(object):
         with open(groundtruth_file, 'wb') as handle:
             pickle.dump(groundtruth, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+    @staticmethod
+    def __min_max_mean(message_length):
+        min_length = min(message_length)
+        max_length = max(message_length)
+        mean_length = mean(message_length)
+
+        print(min_length, max_length, mean_length)
+
     def get_ground_truth(self):
         # get log file
         current_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'datasets', self.dataset))
@@ -80,14 +121,21 @@ class GroundTruth(object):
         anomaly_label = self.__set_sentiment_label(wordlist, parsed_logs)
 
         groundtruth = {}
+        message_length = []
         for line_id, label in anomaly_label.items():
+            preprocessed_message = self.__preprocess(parsed_logs[line_id]['message'])
+            message_length.append(len(preprocessed_message))
+
             groundtruth[line_id] = {
-                'message': parsed_logs[line_id]['message'],
+                'message': preprocessed_message,
                 'label': label
             }
 
         # save ground truth
         self.__save_groundtruth(groundtruth)
+
+        # check min max mean of message length
+        self.__min_max_mean(message_length)
 
 
 if __name__ == '__main__':
