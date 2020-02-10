@@ -35,7 +35,19 @@ Ground truth data for anomaly detection in imbalance authentication logs.
 
 6. Extract SecRepo dataset
 
-   `tar -xzvf datasets/secrepo/auth.log.tar.gz --directory datasets/secrepo/`
+   `tar -xzvf datasets/secrepo/auth.all.log.tar.gz --directory datasets/secrepo/`
+
+## Building the ground truth
+
+1. To build the ground truth, run this command
+   
+   `python imbalance-anomaly-gt/groundtruth.py $DATASET_NAME$`
+   
+   Example:
+   
+   `python imbalance-anomaly-gt/groundtruth.py secrepo`
+
+2. The supported datasets are `dfrws-2009`, `hofstede`, and `secrepo`   
 
 ## References
 
