@@ -47,7 +47,9 @@ Ground truth data for anomaly detection in imbalance authentication logs.
    
    `python imbalance-anomaly-gt/groundtruth.py secrepo`
 
-2. The supported datasets are `dfrws-2009`, `hofstede`, and `secrepo`   
+2. The supported datasets are `dfrws-2009`, `hofstede`, and `secrepo`
+
+3. The ground truth file is `auth.all.pickle` and it is located in directory `datasets/$DATASET_NAME$`
 
 ## References
 
