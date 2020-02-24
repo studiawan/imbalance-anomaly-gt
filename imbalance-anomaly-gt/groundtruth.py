@@ -1,26 +1,24 @@
 import os
-import sys
 import pickle
 import re
+import sys
 from nltk import corpus
-from statistics import mean
 from nerlogparser.nerlogparser import Nerlogparser
 
 
 class GroundTruth(object):
     def __init__(self, dataset):
         self.dataset = dataset
-        self.configurations = {}
         self.parser = Nerlogparser()
         self.stopwords = corpus.stopwords.words('english')
 
     @staticmethod
-    def __read_wordlist():
+    def __read_wordlist(log_type):
         # read word list of particular log type
         current_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'anomaly-terms'))
 
         # open word list files in the specified directory
-        wordlist_path = os.path.join(current_path, 'auth.txt')
+        wordlist_path = os.path.join(current_path, log_type + '.txt')
         with open(wordlist_path, 'r') as f:
             wordlist_temp = f.readlines()
 
@@ -67,8 +65,8 @@ class GroundTruth(object):
         return preprocessed_message
 
     @staticmethod
-    def __set_sentiment_label(wordlist, parsed_logs):
-        sentiment_label = {}
+    def __set_anomaly_label(wordlist, parsed_logs):
+        anomaly_label = {}
 
         # check sentiment for each log line
         for line_id, parsed in parsed_logs.items():
@@ -81,68 +79,63 @@ class GroundTruth(object):
                 # negative sentiment
                 if word in log_lower:
                     label = 0
-                    sentiment_label[line_id] = label
+                    anomaly_label[line_id] = label
                     break
 
             # positive sentiment
             if label == 1:
-                sentiment_label[line_id] = label
-                # print(log_lower)
+                anomaly_label[line_id] = label
 
-        return sentiment_label
+        return anomaly_label
 
     def __save_groundtruth(self, groundtruth):
         current_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'datasets', self.dataset))
-        groundtruth_file = os.path.join(current_path, 'auth.all.pickle')
+        groundtruth_file = os.path.join(current_path, 'log.all.pickle')
         with open(groundtruth_file, 'wb') as handle:
             pickle.dump(groundtruth, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    @staticmethod
-    def __min_max_mean(message_length):
-        min_length = min(message_length)
-        max_length = max(message_length)
-        mean_length = mean(message_length)
-
-        print(min_length, max_length, mean_length)
-
     def get_ground_truth(self):
         # get log file
-        current_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'datasets', self.dataset))
-        log_file = os.path.join(current_path, 'auth.all.log')
-
-        # log parsing
-        parsed_logs = self.__get_preprocessed_logs(log_file)
-
-        # set label for each line in a log file
-        wordlist = self.__read_wordlist()
-        print('\nProcessing', log_file, '...')
-
-        # get label
-        anomaly_label = self.__set_sentiment_label(wordlist, parsed_logs)
+        current_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'datasets', self.dataset, 'logs'))
+        log_files = os.listdir(current_path)
 
         groundtruth = {}
-        message_length = []
-        for line_id, label in anomaly_label.items():
-            preprocessed_message = self.__preprocess(parsed_logs[line_id]['message'])
-            message_length.append(len(preprocessed_message))
+        groundtruth_id = 0
+        for log_file in log_files:
+            # set path
+            file_path = os.path.join(current_path, log_file)
 
-            groundtruth[line_id] = {
-                'message': preprocessed_message,
-                'label': label
-            }
+            # log parsing
+            parsed_logs = self.__get_preprocessed_logs(file_path)
+
+            # get log type
+            log_type = log_file.split('.')[0]
+
+            # set label for each line in a log file
+            wordlist = self.__read_wordlist(log_type)
+            print('\nProcessing', log_file, '...')
+
+            # get label
+            anomaly_label = self.__set_anomaly_label(wordlist, parsed_logs)
+
+            for line_id, label in anomaly_label.items():
+                preprocessed_message = self.__preprocess(parsed_logs[line_id]['message'])
+
+                groundtruth[groundtruth_id] = {
+                    'message': preprocessed_message,
+                    'label': label
+                }
+                groundtruth_id += 1
 
         # save ground truth
         self.__save_groundtruth(groundtruth)
 
-        # check min max mean of message length
-        self.__min_max_mean(message_length)
-
 
 if __name__ == '__main__':
-    dataset_list = ['dfrws-2009', 'hofstede', 'secrepo']
+    dataset_list = ['casper-rw', 'dfrws-2009', 'honeynet']
     if len(sys.argv) < 2:
         print('Please input dataset name.')
-        print('python groundtruth.py dataset_name ')
+        print('python groundtruth.py dataset_name')
         print('Supported datasets:', dataset_list)
         sys.exit(1)
 
