@@ -2,6 +2,6 @@ __pycache__/
 .idea
 *.egg-info/
 *.pyc
-datasets/*/auth.all.log
-datasets/*/auth.all.pickle
+datasets/*/logs/*
+datasets/*/log.all.pickle
 datasets/*/train-test/*
