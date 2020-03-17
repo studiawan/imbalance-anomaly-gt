@@ -25,17 +25,17 @@ Ground truth data for anomaly detection in imbalance authentication logs.
    
    `pip install -e .`
 
-4. Extract dfrws-2009 dataset
+4. Extract casper-rw dataset
 
-   `tar -xzvf datasets/dfrws-2009/auth.all.log.tar.gz --directory datasets/dfrws-2009/`
+   `tar -xzvf datasets/casper-rw/all.log.tar.gz --directory datasets/casper-rw/`
 
-5. Extract Hofstede et al. dataset
+5. Extract dfrws-2009 dataset
 
-   `tar -xzvf datasets/hofstede/auth.all.log.tar.gz --directory datasets/hofstede/`
+   `tar -xzvf datasets/dfrws-2009/all.log.tar.gz --directory datasets/dfrws-2009/`
 
-6. Extract SecRepo dataset
+6. Extract honeynet-challenge7 dataset
 
-   `tar -xzvf datasets/secrepo/auth.all.log.tar.gz --directory datasets/secrepo/`
+   `tar -xzvf datasets/honeynet-challenge7/all.log.tar.gz --directory datasets/honeynet-challenge7/`
 
 ## Building the ground truth
 
@@ -45,16 +45,16 @@ Ground truth data for anomaly detection in imbalance authentication logs.
    
    Example:
    
-   `python imbalance-anomaly-gt/groundtruth.py secrepo`
+   `python imbalance-anomaly-gt/groundtruth.py dfrws-2009`
 
-2. The supported datasets are `dfrws-2009`, `hofstede`, and `secrepo`
+2. The supported datasets are `casper-rw`, `dfrws-2009`, and `honeynet-challenge7`
 
-3. The ground truth file is `auth.all.pickle` and it is located in directory `datasets/$DATASET_NAME$`
+3. The ground truth file is `log.all.pickle` and it is located in directory `datasets/$DATASET_NAME$`
 
 ## References
 
-Casey, E.  and Richard III, G. G. (2009). DFRWS Forensic Challenge 2009. http://old.dfrws.org/2009/challenge/index.shtml
+Garfinkel, S.: nps-2009-casper-rw: An ext3 file system from a bootable USB (2009), http://downloads.digitalcorpora.org/corpora/drives/nps-2009-casper-rw/
 
-Hofstede, R., Hendriks, L., Sperotto, A., and Pras, A. (2014). SSH compromise detection using NetFlow/IPFIX. ACM SIGCOMM Computer Communication Review, 44(5), 20-26.
+Casey, E., Richard III, G.G.: DFRWS Forensic Challenge 2009 (2009), http://old.dfrws.org/2009/challenge/index.shtml
 
-Sconzo, M. (2020). SecRepo.com: security data samples repository. http://www.secrepo.com/auth.log/auth.log.gz
+Arcas, G., Gonzales, H., Cheng, J.: Challenge 7 of the Honeynet Project Forensic Challenge 2011 - Forensic analysis of a compromised server (2011), https://old.honeynet.org/challenges/2011_7_compromised_server
